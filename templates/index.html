@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat</title>
+</head>
+<body>
+{% for message in messages %}
+    <ol>
+        {{ message.date }} {{ message.sender }}: {{ message.message }}
+    </ol>
+{% endfor %}
+{% if not token %}
+    <h1>Форма авторизации</h1>
+<form class="form" action="token" method="post" id="login">
+  <input class="input" type="text" placeholder="Ваше имя" name="username" required>
+  <input class="input" type="password" placeholder="Пароль" name ="password" required >
+    <input class="input" type="text" placeholder="receiver" name ="receiver" required >
+  <button class="btn" type="submit">Авторизация</button>
+</form>
+{% else %}
+    <h1>WebSocket Chat</h1>
+    <input id="messageInput" type="text" placeholder="Введите ваше сообщение...">
+    <button id="sendButton">Отправить</button>
+    <ul id="messages"></ul>
+    <button id="history">История сообщений </button><br>
+<textarea id="resultTextarea" rows="10" cols="100">
+</textarea>
+{% endif %}
+</body>
+    <script>
+        let socket = new WebSocket(`ws://{{host}}/ws/{{username}}/{{receiver}}`);
+        socket.onmessage = function(event) {
+            const messages = document.getElementById("messages");
+            const messageItem = document.createElement("ol");
+            messageItem.textContent = event.data;
+            messages.appendChild(messageItem);
+        };
+        document.getElementById("sendButton").onclick = function() {
+            const input = document.getElementById("messageInput");
+            socket.send(input.value);
+            input.value = '';
+        };
+                const data = {
+            name: "{{username}}",
+            receiver: "{{receiver}}"
+        };
+document.getElementById("history").onclick = function() {
+    fetch('http://{{host}}/history', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data) // Преобразуем данные в строку JSON
+    })
+
+    .then(response => {
+        // Проверяем успешность ответа
+        if (!response.ok) {
+            throw new Error('Сетевая ошибка: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log(data); // Выводим данные, полученные от сервера
+
+        // Предполагаем, что data.messages - это массив сообщений
+        if (Array.isArray(data.messages)) {
+            // Объединяем сообщения в одну строку, например, разделяя их переносом строки
+            document.getElementById("resultTextarea").value = data.messages.join('\n');
+        } else {
+            console.error('Ожидался массив сообщений, но получен:', data.messages);
+        }
+    })
+    .catch(error => console.error('Ошибка:', error));
+}
+    </script>
+</body>
+</html>
+
