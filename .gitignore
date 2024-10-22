@@ -1,0 +1,11 @@
+/.venv/
+/user.db
+/proba.py
+/error.log
+/.env
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/.gitignore
+/.idea/Messaging_service.iml
+/.idea/misc.xml
+/.idea/modules.xml
