@@ -52,7 +52,6 @@ class ChatClient:
         print(prompt, end='', flush=True)
         return await asyncio.get_running_loop().run_in_executor(None, input)
 
-
     async def connect_websocket(self):
         print(f'receiver = {self.receiver}')
         """Подключение к WebSocket."""
@@ -61,14 +60,15 @@ class ChatClient:
             return
 
         url = f"ws://localhost:8000/ws/{self.username}/{self.receiver}"
+
         async def send_message_loop():
             message = ''
-            while message.lower() !="exit":
+            while message.lower() != "exit":
                 message = await self.async_input("Введите сообщение:")
                 await websocket.send(message)
             await websocket.close()
 
-                # Цикл для получения сообщений
+            # Цикл для получения сообщений
         async def receive_messages():
             while True:
                 try:
@@ -83,7 +83,7 @@ class ChatClient:
             await asyncio.gather(
                 send_message_loop(),
                 receive_messages()
-                )
+            )
 
     def run(self):
         """Запускает клиента для работы."""
